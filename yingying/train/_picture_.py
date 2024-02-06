@@ -31,13 +31,13 @@ def render_tickets_to_image(tickets_json, image_path):
     # 准备绘图
     img_width = 1000
     row_height = 50  # 增加行高以适应更大的字体
-    header_height = 40  # 为标题设置较小的高度
+    header_height = 40  # 为标题设置较大的高度
     img_height = header_height + row_height * len(results)
     image = Image.new("RGB", (img_width, img_height), "white")
     draw = ImageDraw.Draw(image)
-    font_path = "gsuid_core/plugins/YingYing/font/朱雀仿宋.ttf"
-    header_font_size = 18  # 标题行较小字体大小
-    detail_font_size = 24  # 详情行较大字体大小
+    font_path = r"C:\Users\Administrator\PycharmProjects\yingying_core\gsuid_core\gsuid_core\plugins\YingYing\font/朱雀仿宋.ttf"
+    header_font_size = 18  # 标题行较大字体大小
+    detail_font_size = 22  # 详情行较大字体大小
     try:
         header_font = ImageFont.truetype(font_path, header_font_size)
         detail_font = ImageFont.truetype(font_path, detail_font_size)
@@ -45,50 +45,41 @@ def render_tickets_to_image(tickets_json, image_path):
         header_font = ImageFont.load_default()
         detail_font = ImageFont.load_default()
 
+    # 定义颜色
+    header_color = "darkblue"  # 标题颜色
+    text_color = "black"  # 文本颜色
+    alternate_row_color = "#F0F0F0"  # 交替行的背景色
+
+    # 绘制标题背景
+    draw.rectangle([0, 0, img_width, header_height], fill=alternate_row_color)
+
     # 绘制标题
     headers = [
-        "车次",
-        "出发站->到达站",
-        "出发时间",
-        "到站时间",
-        "历时",
-        "商务/特等座",
-        "一等座",
-        "二等座",
-        "高级软卧",
-        "软卧",
-        "动卧",
-        "硬卧",
-        "无座",
+        "车次", "出发站->到达站", "出发时间", "到站时间", "历时",
+        "商务/特等座", "一等座", "二等座", "高级软卧", "软卧", "动卧", "硬卧", "无座"
     ]
-    column_widths = [70, 140, 80, 80, 80, 120, 60, 60, 80, 50, 50, 50, 50]
-    x_offset = 10
+    column_widths = [70, 140, 90, 90, 70, 100, 60, 60, 90, 50, 50, 50, 50]
+    x_offset = 0
     for i, header in enumerate(headers):
-        draw.text((x_offset, 10), header, fill="black", font=header_font)
+        draw.text((x_offset, 0), header, fill=header_color, font=header_font)
         x_offset += column_widths[i]
 
     # 绘制车次信息
     y_offset = header_height
-    for ticket in results:
+    for index, ticket in enumerate(results):
+        if index % 2 == 1:  # 为每个交替的行添加背景色
+            draw.rectangle([0, y_offset, img_width, y_offset + row_height], fill=alternate_row_color)
         x_offset = 10
-        info = parse_ticket_info(ticket)
+        # 假设 `parse_ticket_info` 函数可以从ticket中解析出所需的信息
+        info = parse_ticket_info(ticket)  # 需要定义这个函数
         details = [
-            info["train_no"],
-            info["from_to"],
-            info["starttime"],
-            info["endtime"],
-            info["duration"],
-            info["seat_info"]["商务/特等座"],
-            info["seat_info"]["一等座"],
-            info["seat_info"]["二等座"],
-            info["seat_info"]["高级软卧"],
-            info["seat_info"]["软卧"],
-            info["seat_info"]["动卧"],
-            info["seat_info"]["硬卧"],
-            info["seat_info"]["无座"],
+            info["train_no"], info["from_to"], info["starttime"], info["endtime"], info["duration"],
+            info["seat_info"]["商务/特等座"], info["seat_info"]["一等座"], info["seat_info"]["二等座"],
+            info["seat_info"]["高级软卧"], info["seat_info"]["软卧"], info["seat_info"]["动卧"],
+            info["seat_info"]["硬卧"], info["seat_info"]["无座"]
         ]
         for i, detail in enumerate(details):
-            draw.text((x_offset, y_offset), detail, fill="black", font=detail_font)
+            draw.text((x_offset, y_offset), detail, fill=text_color, font=detail_font)
             x_offset += column_widths[i]
         y_offset += row_height
 
