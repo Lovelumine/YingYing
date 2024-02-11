@@ -17,8 +17,8 @@ class TrainTicketFetcher:
     def get_and_save_cookies(self):
         driver = webdriver.Chrome(options=self.chrome_options)
         print("访问12306首页...")
-        driver.get("https://kyfw.12306.cn")
-        time.sleep(2)  # 等待页面加载完成
+        driver.get("https://kyfw.12306.cn/otn/resources/login.html")
+        time.sleep(5)  # 等待页面加载完成
         print("访问完毕。")
         cookies = driver.get_cookies()
         print(f"获取到的Cookies: {cookies}")
@@ -40,12 +40,12 @@ class TrainTicketFetcher:
 
     def use_cookies_to_fetch_and_save_data(self, url):
         driver = webdriver.Chrome(options=self.chrome_options)
-        driver.get("https://kyfw.12306.cn")
+        driver.get("https://kyfw.12306.cn/otn/resources/login.html")
         cookies = self.load_cookies()
         for cookie in cookies:
             driver.add_cookie(cookie)
         driver.get(url)
-        time.sleep(5)  # 等待页面加载完成
+        time.sleep(2)  # 等待页面加载完成
         url_hash = hashlib.md5(url.encode('utf-8')).hexdigest()
         filename = f"page_content_{url_hash}.html"
         file_path = os.path.join(self.target_dir, filename)

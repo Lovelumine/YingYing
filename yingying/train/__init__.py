@@ -3,34 +3,35 @@ import traceback  # 用于记录堆栈跟踪
 
 from gsuid_core.bot import Bot
 from gsuid_core.models import Event
+from gsuid_core.sv import SV
 
 from gsuid_core.plugins.YingYing.YingYing.train._get_station import get_station
 from gsuid_core.plugins.YingYing.YingYing.train._get_tickets import get_tickets_and_render_image_as_bytes
-from gsuid_core.sv import SV
 
 sv_ticket = SV("火车票查询服务")
 
 @sv_ticket.on_fullmatch(["查询火车票", "火车"])
 async def query_ticket_init(bot: Bot, ev: Event):
+    # 启动多步对话，先发送欢迎信息
     await bot.send("欢迎使用火车票查询服务，请输入出发站，目的站和出发日期（格式如：北京 上海 2024-02-10）。")
+    # 等待用户回复
+    resp = await bot.receive_resp()
+    if resp is not None:
+        # 处理用户回复
+        await query_ticket_with_input(bot, resp, resp.text)
 
 @sv_ticket.on_prefix(["火车"])
 async def query_ticket_with_prefix(bot: Bot, ev: Event):
-    user_input = ev.command+ev.text  # 假设ev.message包含用户的完整输入
+    # 由于框架自动处理前缀，可以直接使用ev.text获取去除前缀后的命令
+    await query_ticket_with_input(bot, ev, ev.text.strip())
+
+async def query_ticket_with_input(bot: Bot, ev: Event, user_input: str):
     try:
-        # 尝试解析用户输入，支持带有或没有“火车”前缀的输入格式
-        if user_input.lower().startswith("火车"):
-            user_input = user_input[2:].strip()  # 移除前缀“火车”
         parts = user_input.split()
-        if len(parts) == 3:
-            from_station, to_station, travel_date = parts
-        elif len(parts) == 2:
-            # 假设用户可能将出发站和目的站连写，中间没有空格
-            from_station, rest = parts[0], parts[1]
-            to_station, travel_date = rest.split("2024-")  # 需要一个更好的分割逻辑
-            travel_date = "2024-" + travel_date
-        else:
+        if len(parts) != 3:
             raise ValueError("输入格式不正确。")
+
+        from_station, to_station, travel_date = parts
 
         station_dict = get_station()
         if not station_dict:
