@@ -5,7 +5,6 @@ import base64
 from io import BytesIO
 from bs4 import BeautifulSoup  # 引入BeautifulSoup库进行HTML解析
 
-# 假设 render_tickets_to_image 和 TrainTicketFetcher 已经按照之前的描述实现
 from gsuid_core.plugins.YingYing.YingYing.train._picture_ import render_tickets_to_image
 from gsuid_core.plugins.YingYing.YingYing.train.chrome import TrainTicketFetcher
 
